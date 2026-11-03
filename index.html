@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camisa 10 - Simulador de Carreira de Jogador</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-yellow: #f2a900;
+            --primary-yellow-hover: #ffc425;
+            --bg-dark: #0a0c10;
+            --card-bg: rgba(20, 24, 33, 0.85);
+            --card-border: rgba(242, 169, 0, 0.3);
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 30%, rgba(242, 169, 0, 0.08) 0%, transparent 60%),
+                linear-gradient(to bottom, rgba(10, 12, 16, 0.6), rgba(10, 12, 16, 0.95)),
+                url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Screen Wrapper */
+        .app-container {
+            width: 100%;
+            max-width: 1280px;
+            height: 720px;
+            background: rgba(10, 12, 16, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header / Logo */
+        header {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-title {
+            font-family: 'Teko', sans-serif;
+            font-size: 48px;
+            line-height: 0.9;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-style: italic;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-title span {
+            color: var(--primary-yellow);
+            font-size: 56px;
+        }
+
+        .subtitle-badge {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-left: 2px solid var(--primary-yellow);
+            padding-left: 10px;
+        }
+
+        /* Slanted Buttons */
+        .slant-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            padding: 14px 28px;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transform: skewX(-12deg);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            width: 320px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slant-btn-content {
+            transform: skewX(12deg);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .slant-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: skewX(-12deg) translateX(6deg);
+        }
+
+        .slant-btn.primary {
+            background: var(--primary-yellow);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 20px rgba(242, 169, 0, 0.4);
+        }
+
+        .slant-btn.primary:hover {
+            background: var(--primary-yellow-hover);
+            box-shadow: 0 0 28px rgba(242, 169, 0, 0.6);
+        }
+
+        .slant-btn i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Menu Principal */
+        .menu-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .hero-graphics {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-badge {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        /* Configurações & Formulários */
+        .config-grid, .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Dashboard de Carreira */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 340px;
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .player-ovr-card {
+            text-align: center;
+            background: linear-gradient(180deg, rgba(242, 169, 0, 0.15) 0%, rgba(10, 12, 16, 0.8) 100%);
+            border: 1px solid var(--card-border);
+        }
+
+        .ovr-number {
+            font-family: 'Teko', sans-serif;
+            font-size: 80px;
+            font-weight: 700;
+            line-height: 0.8;
+            color: var(--primary-yellow);
+        }
+
+        .stat-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .progress-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-yellow);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .feed-box {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+
+        .feed-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--primary-yellow);
+            padding: 12px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Footer Slogan */
+        footer {
+            padding: 14px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .slogan {
+            font-weight: 900;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo-box">
+                <div class="logo-title"><i class="fa-solid fa-crown" style="color: var(--primary-yellow); font-size: 32px;"></i> CAMISA <span>10</span></div>
+                <div class="subtitle-badge">Simulador Realista de Carreira</div>
+            </div>
+            <div id="header-status" style="font-size: 13px; font-weight: 700; color: var(--primary-yellow);">
+                <i class="fa-regular fa-calendar-check"></i> Temporada 2026/27
+            </div>
+        </header>
+
+        <!-- MENU PRINCIPAL -->
+        <div id="screen-main-menu" class="screen active">
+            <div class="menu-layout">
+                <div class="menu-options">
+                    <button class="slant-btn primary" onclick="switchScreen('screen-new-career')">
+                        <div class="slant-btn-content"><i class="fa-solid fa-play"></i> Nova Carreira</div>
+                    </button>
+                    <button class="slant-btn" onclick="loadGame()">
+                        <div class="slant-btn-content"><i class="fa-solid fa-folder-open"></i> Carregar Salvo</div>
+                    </button>
+                    <button class="slant-btn" onclick="switchScreen('screen-settings')">
+                        <div class="slant-btn-content"><i class="fa-solid fa-gear"></i> Configurações</div>
+                    </button>
+                    <button class="slant-btn" onclick="alert('Obrigado por jogar Camisa 10!')">
+                        <div class="slant-btn-content"><i class="fa-solid fa-right-from-bracket"></i> Sair do Jogo</div>
+                    </button>
+                </div>
+                <div class="hero-graphics">
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-shirt" style="font-size: 96px; color: var(--primary-yellow); opacity: 0.8;"></i>
+                        <h2 style="font-family: 'Teko'; font-size: 36px; margin-top: 10px;">SEU FUTURO COMESA AGORA...</h2>
+                        <p style="font-size: 13px; color: var(--text-muted);">Construa sua lenda no futebol mundial</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU NOVA CARREIRA -->
+        <div id="screen-new-career" class="screen">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
+                <h2 style="font-family: 'Teko'; font-size: 36px; color: var(--primary-yellow);">CRIAR SEU JOGADOR</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Jogador</label>
+                        <input type="text" id="input-name" class="form-control" value="Matheus Silva">
+                    </div>
+                    <div class="form-group">
+                        <label>Idade Inicial</label>
+                        <input type="number" id="input-age" class="form-control" value="18" min="16" max="23">
+                    </div>
+                    <div class="form-group">
+                        <label>Nacionalidade</label>
+                        <select id="input-nationality" class="form-control">
+                            <option value="Brasil">Brasil 🇧🇷</option>
+                            <option value="Portugal">Portugal 🇵🇹</option>
+                            <option value="Argentina">Argentina 🇦🇷</option>
+                            <option value="Espanha">Espanha 🇪🇸</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Posição Principal</label>
+                        <select id="input-position" class="form-control">
+                            <option value="Atacante">Atacante (ATA)</option>
+                            <option value="Meiampista">Meia Atacante (MEI)</option>
+                            <option value="Ponta">Ponta Direita/Esquerda (EXT)</option>
+                            <option value="Volante">Volante (VOL)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pé Preferido</label>
+                        <select id="input-foot" class="form-control">
+                            <option value="Direito">Direito</option>
+                            <option value="Esquerdo">Esquerdo</option>
+                            <option value="Ambidestro">Ambidestro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Clube de Origem (Base)</label>
+                        <select id="input-club" class="form-control">
+                            <option value="Santos FC Base">Santos FC (Base)</option>
+                            <option value="Flamengo Sub-20">Flamengo (Sub-20)</option>
+                            <option value="Palmeiras Base">Palmeiras (Base)</option>
+                            <option value="Benfica B">Benfica B</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 16px; margin-top: 10px;">
+                    <button class="slant-btn primary" onclick="startNewCareer()">
+                        <div class="slant-btn-content"><i class="fa-solid fa-check"></i> Iniciar Carreira</div>
+                    </button>
+                    <button class="slant-btn" onclick="switchScreen('screen-main-menu')">
+                        <div class="slant-btn-content"><i class="fa-solid fa-arrow-left"></i> Voltar</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU CONFIGURAÇÕES -->
+        <div id="screen-settings" class="screen">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
+                <h2 style="font-family: 'Teko'; font-size: 36px; color: var(--primary-yellow);">CONFIGURAÇÕES DO JOGO</h2>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label>Dificuldade da Simulação</label>
+                        <select class="form-control">
+                            <option>Profissional (Equilibrado)</option>
+                            <option>Lenda (Realista / Exigente)</option>
+                            <option>Amador (Fácil)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Velocidade das Partidas</label>
+                        <select class="form-control">
+                            <option>Normal (Tempo Real)</option>
+                            <option>Rápida (Instantânea)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="slant-btn" onclick="switchScreen('screen-main-menu')">
+                        <div class="slant-btn-content"><i class="fa-solid fa-arrow-left"></i> Voltar</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD DE CARREIRA -->
+        <div id="screen-dashboard" class="screen">
+            <div class="dashboard-grid">
+                <!-- Coluna 1: Status do Jogador -->
+                <div class="card player-ovr-card">
+                    <h3 id="dash-player-name" style="font-size: 18px; font-weight: 900;">Matheus Silva</h3>
+                    <p id="dash-player-details" style="font-size: 12px; color: var(--text-muted);">ATA | Santos FC</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <span style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Overall (OVR)</span>
+                        <div class="ovr-number" id="dash-ovr">68</div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>FINALIZAÇÃO</span><span id="val-fin">70</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-fin" style="width: 70%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>PASSE</span><span id="val-pas">64</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-pas" style="width: 64%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>DRIBLE / RITMO</span><span id="val-dri">72</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-dri" style="width: 72%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>ENERGIA</span><span id="val-ene">100%</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-ene" style="width: 100%; background: var(--accent-green);"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Ações & Treino -->
+                <div class="card">
+                    <h3 style="font-family: 'Teko'; font-size: 28px; color: var(--primary-yellow);">CENTRO DE TREINAMENTO & JOGOS</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">Gerencie sua rotina semanal para melhorar suas habilidades antes da próxima partida.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
+                        <button class="slant-btn" style="width: 100%;" onclick="trainSkill('fin')">
+                            <div class="slant-btn-content"><i class="fa-solid fa-bullseye"></i> Treinar Chute</div>
+                        </button>
+                        <button class="slant-btn" style="width: 100%;" onclick="trainSkill('pas')">
+                            <div class="slant-btn-content"><i class="fa-solid fa-futbol"></i> Treinar Passe</div>
+                        </button>
+                        <button class="slant-btn" style="width: 100%;" onclick="trainSkill('dri')">
+                            <div class="slant-btn-content"><i class="fa-solid fa-bolt"></i> Treinar Drible</div>
+                        </button>
+                        <button class="slant-btn" style="width: 100%;" onclick="restPlayer()">
+                            <div class="slant-btn-content"><i class="fa-solid fa-bed"></i> Descansar</div>
+                        </button>
+                    </div>
+
+                    <div style="margin-top: auto;">
+                        <button class="slant-btn primary" style="width: 100%; height: 50px;" onclick="playMatch()">
+                            <div class="slant-btn-content" style="justify-content: center; font-size: 18px;"><i class="fa-solid fa-play"></i> JOGAR PRÓXIMA PARTIDA</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Coluna 3: Notícias & Histórico -->
+                <div class="card">
+                    <h3 style="font-family: 'Teko'; font-size: 28px; color: var(--primary-yellow);">NOTÍCIAS & FEED DA CARREIRA</h3>
+                    <div id="feed-box" class="feed-box">
+                        <div class="feed-item">
+                            <strong>Contrato Assinado!</strong><br>
+                            Você iniciou sua carreira no time principal. Mostre seu valor no treinamento!
+                        </div>
+                    </div>
+                    <button class="slant-btn" style="width: 100%; margin-top: 10px;" onclick="saveGame()">
+                        <div class="slant-btn-content"><i class="fa-solid fa-floppy-disk"></i> Salvar Jogo</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div><i class="fa-solid fa-circle-info"></i> Versão 1.0.0 - Edição PC</div>
+            <div class="slogan">SONHE. JOGUE. CONQUISTE.</div>
+        </footer>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DO JOGO
+        let gameState = {
+            name: "Matheus Silva",
+            age: 18,
+            nationality: "Brasil",
+            position: "Atacante",
+            foot: "Direito",
+            club: "Santos FC Base",
+            ovr: 68,
+            stats: {
+                fin: 70,
+                pas: 64,
+                dri: 72,
+                energy: 100
+            },
+            matchesPlayed: 0,
+            goals: 0,
+            assists: 0
+        };
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function updateUI() {
+            document.getElementById('dash-player-name').innerText = gameState.name;
+            document.getElementById('dash-player-details').innerText = `${gameState.position} | ${gameState.club}`;
+            
+            // Calcula Overall Simples
+            gameState.ovr = Math.round((gameState.stats.fin + gameState.stats.pas + gameState.stats.dri) / 3);
+            document.getElementById('dash-ovr').innerText = gameState.ovr;
+
+            // Atualiza Barras
+            document.getElementById('val-fin').innerText = gameState.stats.fin;
+            document.getElementById('bar-fin').style.width = gameState.stats.fin + '%';
+            
+            document.getElementById('val-pas').innerText = gameState.stats.pas;
+            document.getElementById('bar-pas').style.width = gameState.stats.pas + '%';
+
+            document.getElementById('val-dri').innerText = gameState.stats.dri;
+            document.getElementById('bar-dri').style.width = gameState.stats.dri + '%';
+
+            document.getElementById('val-ene').innerText = gameState.stats.energy + '%';
+            document.getElementById('bar-ene').style.width = gameState.stats.energy + '%';
+        }
+
+        function addNews(msg) {
+            const feed = document.getElementById('feed-box');
+            const item = document.createElement('div');
+            item.className = 'feed-item';
+            item.innerHTML = msg;
+            feed.prepend(item);
+        }
+
+        function startNewCareer() {
+            gameState.name = document.getElementById('input-name').value || "Matheus Silva";
+            gameState.age = parseInt(document.getElementById('input-age').value) || 18;
+            gameState.nationality = document.getElementById('input-nationality').value;
+            gameState.position = document.getElementById('input-position').value;
+            gameState.foot = document.getElementById('input-foot').value;
+            gameState.club = document.getElementById('input-club').value;
+
+            updateUI();
+            addNews(`<strong>Carreira Iniciada!</strong><br>${gameState.name} assinou contrato profissional com o ${gameState.club}.`);
+            switchScreen('screen-dashboard');
+        }
+
+        function trainSkill(skill) {
+            if (gameState.stats.energy < 20) {
+                alert("Você está muito cansado! Descanse antes de treinar novamente.");
+                return;
+            }
+
+            gameState.stats.energy -= 20;
+            gameState.stats[skill] += 1;
+            
+            let skillName = skill === 'fin' ? 'Finalização' : skill === 'pas' ? 'Passe' : 'Drible';
+            addNews(`<strong>Treino Concluído:</strong> Seu atributo de ${skillName} subiu para ${gameState.stats[skill]}! (-20% Energia)`);
+            updateUI();
+        }
+
+        function restPlayer() {
+            gameState.stats.energy = Math.min(100, gameState.stats.energy + 40);
+            addNews(`<strong>Dia de Folga:</strong> Energia recuperada (+40%).`);
+            updateUI();
+        }
+
+        function playMatch() {
+            if (gameState.stats.energy < 30) {
+                alert("Energia insuficiente para jogar a partida! Descanse primeiro.");
+                return;
+            }
+
+            gameState.stats.energy -= 30;
+            gameState.matchesPlayed++;
+
+            // Simulação de Desempenho
+            let goalChance = Math.random() * 100;
+            let assistChance = Math.random() * 100;
+
+            let scored = goalChance < (gameState.stats.fin * 0.6);
+            let assisted = assistChance < (gameState.stats.pas * 0.5);
+
+            let resText = `<strong>Fim de Jogo!</strong><br>`;
+            if (scored && assisted) {
+                gameState.goals++;
+                gameState.assists++;
+                resText += `Atuação Fantástica! Você marcou 1 GOL ⚽ e deu 1 ASSISTÊNCIA 🅰️!`;
+            } else if (scored) {
+                gameState.goals++;
+                resText += `GOLAAÇO! Você balançou as redes na vitória da sua equipe! ⚽`;
+            } else if (assisted) {
+                gameState.assists++;
+                resText += `Visão de Jogo! Você serviu seu companheiro para o gol! 🅰️`;
+            } else {
+                resText += `Partida disputada. Você se movimentou bem, mas não marcou.`;
+            }
+
+            addNews(resText);
+            updateUI();
+        }
+
+        function saveGame() {
+            localStorage.setItem('camisa10_save', JSON.stringify(gameState));
+            alert("Jogo salvo com sucesso!");
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('camisa10_save');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                updateUI();
+                switchScreen('screen-dashboard');
+                addNews(`<strong>Jogo Carregado!</strong> Bem-vindo de volta, ${gameState.name}.`);
+            } else {
+                alert("Nenhum jogo salvo encontrado.");
+            }
+        }
+    </script>
+</body>
+</html>

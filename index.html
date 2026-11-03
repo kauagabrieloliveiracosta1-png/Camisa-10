@@ -46,7 +46,6 @@
             background-attachment: fixed;
         }
 
-        /* Screen Wrapper */
         .app-container {
             width: 100%;
             max-width: 1280px;
@@ -62,7 +61,6 @@
             overflow: hidden;
         }
 
-        /* Header / Logo */
         header {
             padding: 24px 40px;
             display: flex;
@@ -106,7 +104,6 @@
             padding-left: 10px;
         }
 
-        /* Slanted Buttons */
         .slant-btn {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -160,7 +157,6 @@
             text-align: center;
         }
 
-        /* Screen Management */
         .screen {
             display: none;
             flex: 1;
@@ -178,7 +174,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Menu Principal */
         .menu-layout {
             display: flex;
             width: 100%;
@@ -208,7 +203,6 @@
             text-align: center;
         }
 
-        /* Configurações & Formulários */
         .config-grid, .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -246,7 +240,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Dashboard de Carreira */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 280px 1fr 340px;
@@ -307,7 +300,6 @@
             transition: width 0.3s ease;
         }
 
-        /* Tabela da Competição */
         .league-table-container {
             width: 100%;
             overflow-x: auto;
@@ -339,7 +331,6 @@
             color: var(--primary-yellow);
         }
 
-        /* Feed Simplificado */
         .feed-box {
             max-height: 160px;
             overflow-y: auto;
@@ -358,7 +349,6 @@
             line-height: 1.3;
         }
 
-        /* Footer Slogan */
         footer {
             padding: 12px 40px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -396,16 +386,16 @@
         <div id="screen-main-menu" class="screen active">
             <div class="menu-layout">
                 <div class="menu-options">
-                    <button class="slant-btn primary" onclick="switchScreen('screen-new-career')">
+                    <button class="slant-btn primary" id="btn-new-career">
                         <div class="slant-btn-content"><i class="fa-solid fa-play"></i> Nova Carreira</div>
                     </button>
-                    <button class="slant-btn" onclick="loadGame()">
+                    <button class="slant-btn" id="btn-load-game">
                         <div class="slant-btn-content"><i class="fa-solid fa-folder-open"></i> Carregar Salvo</div>
                     </button>
-                    <button class="slant-btn" onclick="switchScreen('screen-settings')">
+                    <button class="slant-btn" id="btn-settings">
                         <div class="slant-btn-content"><i class="fa-solid fa-gear"></i> Configurações</div>
                     </button>
-                    <button class="slant-btn" onclick="alert('Obrigado por jogar Camisa 10!')">
+                    <button class="slant-btn" id="btn-exit">
                         <div class="slant-btn-content"><i class="fa-solid fa-right-from-bracket"></i> Sair do Jogo</div>
                     </button>
                 </div>
@@ -469,10 +459,10 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 16px; margin-top: 10px;">
-                    <button class="slant-btn primary" onclick="startNewCareer()">
+                    <button class="slant-btn primary" id="btn-start-career">
                         <div class="slant-btn-content"><i class="fa-solid fa-check"></i> Iniciar Carreira</div>
                     </button>
-                    <button class="slant-btn" onclick="switchScreen('screen-main-menu')">
+                    <button class="slant-btn" id="btn-back-main">
                         <div class="slant-btn-content"><i class="fa-solid fa-arrow-left"></i> Voltar</div>
                     </button>
                 </div>
@@ -482,4 +472,67 @@
         <!-- MENU CONFIGURAÇÕES -->
         <div id="screen-settings" class="screen">
             <div style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
-                <h2 style="font
+                <h2 style="font-family: 'Teko'; font-size: 36px; color: var(--primary-yellow);">CONFIGURAÇÕES DO JOGO</h2>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label>Dificuldade da Simulação</label>
+                        <select class="form-control">
+                            <option>Profissional (Equilibrado)</option>
+                            <option>Lenda (Realista / Exigente)</option>
+                            <option>Amador (Fácil)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Velocidade das Partidas</label>
+                        <select class="form-control">
+                            <option>Normal (Tempo Real)</option>
+                            <option>Rápida (Instantânea)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="slant-btn" id="btn-back-settings">
+                        <div class="slant-btn-content"><i class="fa-solid fa-arrow-left"></i> Voltar</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD DE CARREIRA -->
+        <div id="screen-dashboard" class="screen">
+            <div class="dashboard-grid">
+                <!-- Coluna 1: Status do Jogador -->
+                <div class="card player-ovr-card">
+                    <h3 id="dash-player-name" style="font-size: 18px; font-weight: 900;">Matheus Silva</h3>
+                    <p id="dash-player-details" style="font-size: 12px; color: var(--text-muted);">ATA | Santos FC</p>
+                    
+                    <div style="margin: 10px 0;">
+                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Overall (OVR)</span>
+                        <div class="ovr-number" id="dash-ovr">68</div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>FINALIZAÇÃO</span><span id="val-fin">70</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-fin" style="width: 70%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>PASSE</span><span id="val-pas">64</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-pas" style="width: 64%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>DRIBLE / RITMO</span><span id="val-dri">72</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-dri" style="width: 72%;"></div></div>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-info"><span>ENERGIA</span><span id="val-ene">100%</span></div>
+                            <div class="progress-bg"><div class="progress-fill" id="bar-ene" style="width: 100%; background: var(--accent-green);"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Treino e Tabela da Competição -->
+                <div class="card">
+                    <h3 style="font-family: 'Teko'; font-size: 24px; color: var(--primary-yellow);">TABELA DA COMPETIÇÃO</h3>
+                    
+                    <!-- TABELA D
